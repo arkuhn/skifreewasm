@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL.h>
 class Player;
+class HUD;
 
 class Game {
 public:
@@ -18,4 +19,10 @@ private:
     SDL_Renderer* renderer;
     bool running;
     Player* player;
+    HUD* hud;
+    
+    // Game state
+    int score;
+    int speed;
+    int distance;
 }; 

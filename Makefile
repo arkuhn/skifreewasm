@@ -9,6 +9,7 @@ copy:
 	cp $(BUILD_DIR)/$(TARGET).html $(WEB_DIR)/
 	cp $(BUILD_DIR)/$(TARGET).js $(WEB_DIR)/
 	cp $(BUILD_DIR)/$(TARGET).wasm $(WEB_DIR)/
+	cp $(BUILD_DIR)/$(TARGET).data $(WEB_DIR)/
 
 serve:
 	cd $(WEB_DIR) && python3 -m http.server 8000

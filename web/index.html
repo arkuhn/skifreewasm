@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎿 SkiFree WebAssembly</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #87CEEB 0%, #E0F6FF 50%, #FFFFFF 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2C5282;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #4A5568;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .game-container {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            padding: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .status-bar {
+            background: #2C5282;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2C5282;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            background: #e2e8f0;
+            border-radius: 10px;
+            height: 20px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #2C5282, #3182CE);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        #canvas {
+            display: block;
+            margin: 0 auto;
+            border: 3px solid #2C5282;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: #000;
+        }
+
+        .controls-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .controls-section {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        .controls-box {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 25px;
+        }
+
+        .controls-box h3 {
+            color: #2C5282;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border-left: 4px solid #2C5282;
+        }
+
+        .control-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .action {
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .key {
+            background: #2C5282;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .footer {
+            text-align: center;
+            color: #4A5568;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            background: rgba(255,255,255,0.7);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .footer p {
+            margin-bottom: 5px;
+        }
+
+        .footer p:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎿 SkiFree WebAssembly</h1>
+        <p class="subtitle">The classic 1991 ski game, now in your browser!</p>
+        
+        <div class="game-container">
+            <div class="status-bar" id="status">Loading game...</div>
+            <div class="spinner" id="spinner"></div>
+            <div class="progress-bar" style="display: none;" id="progress-container">
+                <div class="progress-fill" id="progress" style="width: 0%;"></div>
+            </div>
+            
+            <canvas id="canvas" width="800" height="600" tabindex="1"></canvas>
+        </div>
+        
+        <div class="controls-section">
+            <div class="controls-box">
+                <h3>🎮 Movement Controls</h3>
+                <div class="control-item">
+                    <span class="action">Steer Left</span>
+                    <span class="key">←</span>
+                </div>
+                <div class="control-item">
+                    <span class="action">Steer Right</span>
+                    <span class="key">→</span>
+                </div>
+                <div class="control-item">
+                    <span class="action">Speed Up</span>
+                    <span class="key">↑</span>
+                </div>
+                <div class="control-item">
+                    <span class="action">Slow Down</span>
+                    <span class="key">↓</span>
+                </div>
+                <div class="control-item">
+                    <span class="action">Jump</span>
+                    <span class="key">SPACE</span>
+                </div>
+            </div>
+            
+            <div class="controls-box">
+                <h3>🎯 Gameplay Tips</h3>
+                <div class="control-item">
+                    <span class="action">Avoid trees & rocks</span>
+                    <span class="key">🌲🪨</span>
+                </div>
+                <div class="control-item">
+                    <span class="action">Hit slalom flags for points</span>
+                    <span class="key">🚩</span>
+                </div>
+                <div class="control-item">
+                    <span class="action">Jump over obstacles</span>
+                    <span class="key">🦘</span>
+                </div>
+                <div class="control-item">
+                    <span class="action">Beware the yeti at high speed!</span>
+                    <span class="key">👹</span>
+                </div>
+                <div class="control-item">
+                    <span class="action">Press SPACE to restart when crashed</span>
+                    <span class="key">🔄</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Built with SDL2 + WebAssembly | Original SkiFree by Chris Pirih (1991)</p>
+            <p>Use arrow keys to steer, SPACE to jump. Avoid the yeti! 🎿</p>
+        </div>
+    </div>
+
+    <script type='text/javascript'>
+        var statusElement = document.getElementById('status');
+        var progressElement = document.getElementById('progress');
+        var progressContainer = document.getElementById('progress-container');
+        var spinnerElement = document.getElementById('spinner');
+        var canvasElement = document.getElementById('canvas');
+
+        // Focus canvas for keyboard input
+        canvasElement.focus();
+
+        var Module = {
+            canvas: canvasElement,
+            setStatus: function(text) {
+                if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
+                if (text === Module.setStatus.last.text) return;
+                var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+                var now = Date.now();
+                if (m && now - Module.setStatus.last.time < 30) return; // if this is a progress update, skip it if too soon
+                Module.setStatus.last.time = now;
+                Module.setStatus.last.text = text;
+                if (m) {
+                    text = m[1];
+                    var progress = parseInt(m[2]) / parseInt(m[4]) * 100;
+                    progressElement.style.width = progress + '%';
+                    progressContainer.style.display = 'block';
+                    spinnerElement.style.display = 'block';
+                } else {
+                    progressContainer.style.display = 'none';
+                    if (!text) {
+                        spinnerElement.style.display = 'none';
+                        statusElement.innerHTML = 'Game loaded! Click canvas and use arrow keys to play.';
+                        statusElement.style.background = '#38A169';
+                    }
+                }
+                if (text && m) statusElement.innerHTML = text;
+            },
+            totalDependencies: 0,
+            monitorRunDependencies: function(left) {
+                this.totalDependencies = Math.max(this.totalDependencies, left);
+                Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+            }
+        };
+        
+        Module.setStatus('Downloading...');
+        
+        window.onerror = function(event) {
+            Module.setStatus('Exception thrown, see JavaScript console');
+            spinnerElement.style.display = 'none';
+            statusElement.innerHTML = 'Error loading game. Please refresh the page.';
+            statusElement.style.background = '#E53E3E';
+            Module.setStatus = function(text) {
+                if (text) console.error('[post-exception status] ' + text);
+            };
+        };
+    </script>
+    <script async type="text/javascript" src="skifree.js"></script>
+</body>
+</html> 

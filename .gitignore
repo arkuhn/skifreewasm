@@ -2,9 +2,7 @@
 build/
 *.o
 *.obj
-*.wasm
-*.js
-*.html
+
 
 # IDE files
 .vscode/

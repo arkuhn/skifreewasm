@@ -1,7 +1,13 @@
 #pragma once
 #include <SDL.h>
+#include <vector>
+
 class Player;
+class Obstacle;
 class HUD;
+
+constexpr int SCREEN_WIDTH = 800;
+constexpr int SCREEN_HEIGHT = 600;
 
 class Game {
 public:
@@ -14,15 +20,21 @@ private:
     void processEvents();
     void update();
     void render();
+    void manageObstacles();
+    void checkCollisions();
 
     SDL_Window* window;
     SDL_Renderer* renderer;
     bool running;
+    
     Player* player;
     HUD* hud;
+    std::vector<Obstacle*> obstacles;
+
+    float steer;
     
     // Game state
     int score;
     int speed;
-    int distance;
+    int world_y; // World scroll position
 }; 

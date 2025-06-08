@@ -19,4 +19,8 @@ all: build copy
 watch:
 	find src include | entr -c make all
 
-.PHONY: build copy serve all watch 
+clean:
+	rm -rf $(BUILD_DIR)
+	mkdir -p $(BUILD_DIR)
+
+.PHONY: build copy serve all watch clean 
